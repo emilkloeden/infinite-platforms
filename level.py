@@ -1,27 +1,26 @@
 import os
 import pygame
 import random
-import sys
 
 from debug import debug
-from main import restart
 from player import Player
 from platform import ExitPlatform, Platform
 from settings import *
-from utils import render_multi_colour_text
+from utils import save_high_score
 
 
 class Level:
     def __init__(self, score, platform_speed, bg_image, game):
         # Pygame artefacts
-        self.clock  = pygame.time.Clock()
         self.bg_image = bg_image
-        self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font(os.path.join("assets", "fonts", "NeonSans.otf"), 64)
         self.small_font = pygame.font.Font(os.path.join("assets", "fonts", "NeonSans.otf"), 32)
         self.score = score
-        self.game = game
         self.paused = False
+        
+        #TODO Whilst messing with state machine, fix if required
+        self.display_surface = pygame.display.get_surface()
+        self.game = game
 
                 
         # Platforms
@@ -46,10 +45,6 @@ class Level:
         # Player
         self.player = pygame.sprite.GroupSingle()
         Player((self.platforms.sprites()[1].rect.x, TILE_SIZE * 2), self.platforms, self.exit_platforms, self.on_player_death, self.pause, [self.player])
-        
-        # Level state
-        self.running = True
-
 
     def pause(self):
         self.paused = not self.paused
@@ -75,15 +70,6 @@ class Level:
         if self.score > self.game.high_score:
             self.game.high_score = self.score
 
-    def run(self):
-        while self.running:
-            self.handle_input()
-            if not self.paused:
-                self.update()
-            self.draw()
-            pygame.display.update()
-            self.clock.tick(FPS)
-        self.on_end_game()
 
     def handle_input(self):
         self.player.sprite.handle_input()
@@ -140,50 +126,18 @@ class Level:
         self.draw_high_score()
         if self.paused:
             self.draw_paused_message()
-        self.print_debug_statements()
+        # self.print_debug_statements()
 
     def print_debug_statements(self):
         debug(f"{self.current_platform_speed=}")
 
     def on_player_death(self):
-        self.running = False
+        self.game.next_state = "ENDGAME"
+        self.game.persist["score"] = self.score
+        self.game.persist["high_score"] = self.game.high_score
+        self.game.persist["bg_image"] = self.bg_image
         if self.score >= self.game.high_score:
-            self.game.save_high_score()
+            save_high_score(self.score)
+        
+        self.game.done = True
     
-    def handle_input_end_game(self):
-         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                else:
-                    restart()
-
-    def draw_end_game(self):
-        self.draw_background()
-        self.draw_score()
-        self.draw_high_score()
-
-        message = "Game Over" 
-        surf = self.font.render(message, True, NEON_PINK)
-        
-        rect = surf.get_rect(center=(WINDOW_HORIZONTAL_CENTER, WINDOW_VERITICAL_CENTER - surf.get_height()))
-        self.display_surface.blit(surf,rect)
-        
-        message = "Press any key to restart"
-        
-        surf = self.small_font.render(message, True, NEON_BLUE)
-        
-        rect = surf.get_rect(center=(WINDOW_HORIZONTAL_CENTER, WINDOW_VERITICAL_CENTER + surf.get_height()))
-        self.display_surface.blit(surf, rect)
-        
-
-    def on_end_game(self):
-        while not self.running:
-            self.handle_input_end_game()
-            self.draw_end_game()
-            pygame.display.update()
-            self.clock.tick(FPS)

@@ -1,7 +1,7 @@
 import pygame
 import sys
 from debug import debug
-from main import restart
+# from main import restart
 from settings import *
 from utils import import_folder
 
@@ -64,8 +64,8 @@ class Player(pygame.sprite.Sprite):
 
                 elif event.key == pygame.K_p:
                     self.pause()
-                elif event.key == pygame.K_r:
-                    restart()
+                # elif event.key == pygame.K_r:
+                #     restart()
                 elif event.key == pygame.K_UP:
                     self.jump()
 

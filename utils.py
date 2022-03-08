@@ -21,3 +21,26 @@ def render_multi_colour_text(font, text, odd_colour, even_colour):
     odd_image = font.render(odd_text, True, pygame.Color(odd_colour))
     even_image = font.render(even_text, True, pygame.Color(even_colour))
     return [odd_image, even_image]
+
+
+def load_high_score():
+    try:
+        with open(os.path.join("data", "high_score.txt"), "r") as f:
+            return int(f.readline().strip())
+    except FileNotFoundError:
+        with open(os.path.join("data", "high_score.txt"), "w") as f:
+            f.write(0)
+        return 0
+    except ValueError:
+        return 0
+
+def save_high_score(high_score):
+    with open(os.path.join("data", "high_score.txt"), "w") as f:
+        f.write(f"{int(high_score)}")
+
+def load_background_images():
+    return [
+        pygame.image.load(os.path.join("assets", "backgrounds", png)).convert_alpha() 
+        for png in os.listdir(os.path.join("assets", "backgrounds"))
+        if png.lower().endswith(".png")
+        ]

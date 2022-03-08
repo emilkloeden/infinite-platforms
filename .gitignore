@@ -2,6 +2,8 @@
 assets/spritesheets
 assets/backgrounds
 assets/fonts
+*.bak
+data/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
