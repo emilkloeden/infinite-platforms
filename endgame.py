@@ -18,26 +18,23 @@ class EndGame(_State):
         self.high_score = self.persist["high_score"]
         self.bg_image = self.persist['bg_image']
         
-    def draw_score(self):
-        display_surface = pygame.display.get_surface()
+    def draw_score(self, surface):
         surf = self.font.render(f"{self.score}", True, DARK)
         rect = surf.get_rect(topright=(WINDOW_WIDTH - TILE_SIZE, TILE_SIZE))
-        display_surface.blit(surf, rect)
+        surface.blit(surf, rect)
         
-    def draw_high_score(self):
-        display_surface = pygame.display.get_surface()
+    def draw_high_score(self, surface):
         surf = self.small_font.render(f"Best: {self.high_score}", True, DARK)
         rect = surf.get_rect(topright=(WINDOW_WIDTH - TILE_SIZE, TILE_SIZE*2))
-        display_surface.blit(surf, rect)
+        surface.blit(surf, rect)
 
-    def draw_background(self):
-        display_surface = pygame.display.get_surface()
-        display_surface.blit(self.bg_image, (0,0))
+    def draw_background(self, surface):
+        surface.blit(self.bg_image, (0,0))
 
     def draw(self, surface):
-        self.draw_background()
-        self.draw_score()
-        self.draw_high_score()
+        self.draw_background(surface)
+        self.draw_score(surface)
+        self.draw_high_score(surface)
 
         message = "Game Over" 
         surf = self.font.render(message, True, NEON_PINK)

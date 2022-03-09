@@ -75,7 +75,7 @@ class Game(_State):
             self.level.update()
 
     def draw(self, surface):
-        self.level.draw()
+        self.level.draw(surface)
 
     def save_high_score(self):
         with open(os.path.join("data", "high_score.txt"), "w") as f:

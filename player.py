@@ -1,9 +1,9 @@
 import pygame
-import sys
+
 from debug import debug
-# from main import restart
 from settings import *
 from utils import import_folder
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, platforms, exit_platforms, on_death, pause, groups):
@@ -52,32 +52,6 @@ class Player(pygame.sprite.Sprite):
             full_path = character_path + animation
             self.animations[animation] = import_folder(full_path)
 
-    def handle_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-
-                elif event.key == pygame.K_p:
-                    self.pause()
-                # elif event.key == pygame.K_r:
-                #     restart()
-                elif event.key == pygame.K_UP:
-                    self.jump()
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.direction.x = -self.speed
-        elif keys[pygame.K_RIGHT]:
-            self.direction.x = self.speed
-        else:
-            self.direction.x = 0
-
-
     def apply_gravity(self):
         # If we're not on a platform, apply gravity
         # Our vertical positioning if on a platform is controlled by the platform class (to avoid a bounce effect)
@@ -85,8 +59,6 @@ class Player(pygame.sprite.Sprite):
             self.direction.y += self.gravity_force
             self.rect.y += self.direction.y
         
-
-
     def jump(self):
         if not self.jumping:
             self.jumping = True
@@ -138,7 +110,7 @@ class Player(pygame.sprite.Sprite):
         elif self.direction.x > 0:
             self.status = 'right'
         # if not currently idle, be either left_idle or right_idle
-        # THIS WILL BREAK WHEN NEW ANIMATIONS ADDED
+        # TODO FIX:- THIS WILL BREAK WHEN NEW ANIMATIONS ADDED
         elif "_idle" not in self.status:
             self.status += "_idle"
         

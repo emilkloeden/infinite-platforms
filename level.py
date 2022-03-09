@@ -13,13 +13,13 @@ class Level:
     def __init__(self, score, platform_speed, bg_image, game):
         # Pygame artefacts
         self.bg_image = bg_image
+        self.bg_image_pos = pygame.math.Vector2(0)
+        self.bg_image_relative_y = 0
         self.font = pygame.font.Font(os.path.join("assets", "fonts", "NeonSans.otf"), 64)
         self.small_font = pygame.font.Font(os.path.join("assets", "fonts", "NeonSans.otf"), 32)
         self.score = score
         self.paused = False
         
-        #TODO Whilst messing with state machine, fix if required
-        self.display_surface = pygame.display.get_surface()
         self.game = game
 
                 
@@ -86,6 +86,10 @@ class Level:
         else:
             self.can_increase_platform_speed = True
 
+        self.bg_image_relative_y = self.bg_image_pos.y % self.bg_image.get_rect().height
+        self.bg_image_relative_y += self.current_platform_speed // 2
+        self.bg_image_pos.y = self.bg_image_relative_y - self.bg_image.get_rect().height
+        
         self.platforms.update(on_kill=self.spawn_platform, on_land=self.increment_score, set_speed=self.current_platform_speed)
         self.exit_platforms.update(on_land=self.increment_level, set_speed=self.current_platform_speed)
         
@@ -94,38 +98,38 @@ class Level:
         self.increment_score()
         self.game.next_level(self.score, self.current_platform_speed -1 if self.current_platform_speed >= 2 else 1)
 
-    def draw_score(self):
-        display_surface = pygame.display.get_surface()
+    def draw_score(self, surface):
         surf = self.font.render(f"{self.score}", True, DARK)
         rect = surf.get_rect(topright=(WINDOW_WIDTH - TILE_SIZE, TILE_SIZE))
-        display_surface.blit(surf, rect)
+        surface.blit(surf, rect)
         
-    def draw_high_score(self):
-        display_surface = pygame.display.get_surface()
+    def draw_high_score(self, surface):
         surf = self.small_font.render(f"Best: {self.game.high_score}", True, DARK)
         rect = surf.get_rect(topright=(WINDOW_WIDTH - TILE_SIZE, TILE_SIZE*2))
-        display_surface.blit(surf, rect)
+        surface.blit(surf, rect)
         
 
-    def draw_paused_message(self):
-        display_surface = pygame.display.get_surface()
+    def draw_paused_message(self, surface):
         surf = self.font.render("PAUSED", True, DARK)
         rect = surf.get_rect(center=WINDOW_CENTER)
-        display_surface.blit(surf, rect) 
+        surface.blit(surf, rect) 
 
-    def draw_background(self):
-        self.display_surface.blit(self.bg_image, (0,0))
-        
+    def draw_background(self, surface):
+        debug(f"{self.bg_image.get_rect()=}")
+        debug(f"{self.bg_image_pos.y=}", y=10)
+        surface.blit(self.bg_image, self.bg_image_pos)
+        if self.bg_image_pos.y < WINDOW_HEIGHT:
+            surface.blit(self.bg_image, (0, self.bg_image_relative_y))
 
-    def draw(self):
-        self.draw_background()
-        self.platforms.draw(self.display_surface)
-        self.exit_platforms.draw(self.display_surface)
-        self.player.sprite.draw(self.display_surface)
-        self.draw_score()
-        self.draw_high_score()
+    def draw(self, surface):
+        self.draw_background(surface)
+        self.platforms.draw(surface)
+        self.exit_platforms.draw(surface)
+        self.player.sprite.draw(surface)
+        self.draw_score(surface)
+        self.draw_high_score(surface)
         if self.paused:
-            self.draw_paused_message()
+            self.draw_paused_message(surface)
         # self.print_debug_statements()
 
     def print_debug_statements(self):
