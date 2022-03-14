@@ -59,13 +59,13 @@ class Game(_State):
                 self.level.pause()
             # elif event.key == pygame.K_r:
             #     restart()
-            elif event.key == pygame.K_UP:
+            elif event.key in [pygame.K_UP, pygame.K_w, pygame.K_SPACE]:
                 player.jump()
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             player.direction.x = -player.speed
-        elif keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             player.direction.x = player.speed
         else:
             player.direction.x = 0

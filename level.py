@@ -76,7 +76,18 @@ class Level:
 
     def update(self):
         self.player.update()
+        self.increase_platform_speed()
+        self.update_background()
         
+        self.platforms.update(on_kill=self.spawn_platform, on_land=self.increment_score, set_speed=self.current_platform_speed)
+        self.exit_platforms.update(on_land=self.increment_level, set_speed=self.current_platform_speed)
+
+    def update_background(self):
+        self.bg_image_relative_y = self.bg_image_pos.y % self.bg_image.get_rect().height
+        self.bg_image_relative_y += self.current_platform_speed // 2
+        self.bg_image_pos.y = self.bg_image_relative_y - self.bg_image.get_rect().height
+
+    def increase_platform_speed(self):
         if self.current_platform_speed >= MAX_PLATFORM_SPEED:
             self.can_increase_platform_speed = False
         elif self.score % NUM_OF_PLATFORMS_BEFORE_SPEED_INCREASE == 0:
@@ -85,17 +96,11 @@ class Level:
                 self.current_platform_speed += 0.5
         else:
             self.can_increase_platform_speed = True
-
-        self.bg_image_relative_y = self.bg_image_pos.y % self.bg_image.get_rect().height
-        self.bg_image_relative_y += self.current_platform_speed // 2
-        self.bg_image_pos.y = self.bg_image_relative_y - self.bg_image.get_rect().height
-        
-        self.platforms.update(on_kill=self.spawn_platform, on_land=self.increment_score, set_speed=self.current_platform_speed)
-        self.exit_platforms.update(on_land=self.increment_level, set_speed=self.current_platform_speed)
         
 
     def increment_level(self):
         self.increment_score()
+        self.exit_platforms.remove()
         self.game.next_level(self.score, self.current_platform_speed -1 if self.current_platform_speed >= 2 else 1)
 
     def draw_score(self, surface):
@@ -115,9 +120,8 @@ class Level:
         surface.blit(surf, rect) 
 
     def draw_background(self, surface):
-        debug(f"{self.bg_image.get_rect()=}")
-        debug(f"{self.bg_image_pos.y=}", y=10)
         surface.blit(self.bg_image, self.bg_image_pos)
+        # Add a copy of the image for infinite scrolling
         if self.bg_image_pos.y < WINDOW_HEIGHT:
             surface.blit(self.bg_image, (0, self.bg_image_relative_y))
 
@@ -130,7 +134,7 @@ class Level:
         self.draw_high_score(surface)
         if self.paused:
             self.draw_paused_message(surface)
-        # self.print_debug_statements()
+        self.print_debug_statements()
 
     def print_debug_statements(self):
         debug(f"{self.current_platform_speed=}")

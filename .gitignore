@@ -2,6 +2,7 @@
 assets/spritesheets
 assets/backgrounds
 assets/fonts
+assets/sounds/boing.wav
 *.bak
 data/*
 

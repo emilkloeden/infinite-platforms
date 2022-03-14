@@ -1,3 +1,4 @@
+import os
 import pygame
 
 from debug import debug
@@ -15,13 +16,18 @@ class Player(pygame.sprite.Sprite):
         # Image
         self.image = pygame.Surface(PLAYER_SIZE)
         self.rect = self.image.get_rect(topleft=pos)
-        self.image.fill(DARK)
         
 
         # graphics setup
         self.import_player_assets()
         self.frame_index = 0
         self.animation_speed = 0.15
+
+        # Sound setup
+        sound_file = os.path.join("assets", "sounds", "boing.wav")
+        self.jump_sound = None
+        if os.path.exists(sound_file) and not MUTE:
+            self.jump_sound = pygame.mixer.Sound(sound_file)
 
         # Movement
         self.pos = pygame.math.Vector2(pos)
@@ -30,7 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = 3
         self.jumping = False
         self.on_platform = True
-        self.jump_force = -20
+        self.jump_force = -22
         self.gravity_force = 0.8
 
         self.current_platform = None
@@ -61,6 +67,8 @@ class Player(pygame.sprite.Sprite):
         
     def jump(self):
         if not self.jumping:
+            if self.jump_sound:
+                pygame.mixer.Sound.play(self.jump_sound)
             self.jumping = True
             self.direction.y = self.jump_force
 
@@ -87,12 +95,12 @@ class Player(pygame.sprite.Sprite):
         else:
             for exit_platform in self.exit_platforms.sprites():
                 if exit_platform.rect.colliderect(self.rect):
-                    if self.rect.centery < exit_platform.rect.centery:
+                    if self.rect.bottom <= exit_platform.rect.centery:
                         exit_platform.player = self
 
             for platform in self.platforms.sprites():
                 if platform.rect.colliderect(self.rect):
-                    if self.rect.centery < platform.rect.centery: # is above the platform
+                    if self.rect.bottom <= platform.rect.centery: # is above the platform
                         self.current_platform = platform
                         platform.player = self
                         self.direction.y = 0
@@ -144,8 +152,10 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        # self.print_debug_calls()
+        # self.print_debug_statements()
 
 
-    def print_debug_calls(self):
-        debug(self.direction.y)
+    def print_debug_statements(self):
+        debug(f"{self.rect.bottom=}")
+        debug(f"{[p.rect.top for p in self.platforms]=}", y=30)
+        
